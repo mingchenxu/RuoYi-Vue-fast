@@ -1,10 +1,16 @@
 package com.ruoyi.framework.security.filter;
 
 import java.io.IOException;
+import java.io.PrintWriter;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
+import com.ruoyi.common.constant.HttpStatus;
+import com.ruoyi.common.utils.JsonUtil;
+import com.ruoyi.framework.web.domain.AjaxResult;
+import io.jsonwebtoken.ExpiredJwtException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -31,7 +37,21 @@ public class JwtAuthenticationTokenFilter extends OncePerRequestFilter
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
             throws ServletException, IOException
     {
-        LoginUser loginUser = tokenService.getLoginUser(request);
+        LoginUser loginUser = null;
+        try {
+            loginUser = tokenService.getLoginUser(request);
+        } catch (ExpiredJwtException e) {
+            // 捕获Jwt Token 过期异常，需告知前端Token过期
+            response.setContentType("application/json;charset=utf-8");
+            PrintWriter writer = response.getWriter();
+            writer.write(JsonUtil.bean2Json(AjaxResult.error(HttpStatus.UNAUTHORIZED, "jwt expired")));
+            writer.flush();
+            writer.close();
+            return;
+        }
+        catch (Exception e)
+        {
+        }
         if (StringUtils.isNotNull(loginUser) && StringUtils.isNull(SecurityUtils.getAuthentication()))
         {
             tokenService.verifyToken(loginUser);

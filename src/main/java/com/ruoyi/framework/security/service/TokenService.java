@@ -1,5 +1,6 @@
 package com.ruoyi.framework.security.service;
 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -40,11 +41,17 @@ public class TokenService
     @Value("${token.expireTime}")
     private int expireTime;
 
+    // 刷新令牌有效期（默认7天）
+    @Value("${token.refreshExpireTime}")
+    private int refreshExpireTime;
+
     protected static final long MILLIS_SECOND = 1000;
 
     protected static final long MILLIS_MINUTE = 60 * MILLIS_SECOND;
 
     private static final Long MILLIS_MINUTE_TEN = 20 * 60 * 1000L;
+
+    private static final Long MILLIS_DAY = 144 * MILLIS_MINUTE_TEN;
 
     @Autowired
     private RedisCache redisCache;
@@ -60,18 +67,27 @@ public class TokenService
         String token = getToken(request);
         if (StringUtils.isNotEmpty(token))
         {
-            try
-            {
-                Claims claims = parseToken(token);
-                // 解析对应的权限以及用户信息
-                String uuid = (String) claims.get(Constants.LOGIN_USER_KEY);
-                String userKey = getTokenKey(uuid);
-                LoginUser user = redisCache.getCacheObject(userKey);
-                return user;
-            }
-            catch (Exception e)
-            {
-            }
+            Claims claims = parseToken(token);
+            // 解析对应的权限以及用户信息
+            String uuid = (String) claims.get(Constants.LOGIN_USER_KEY);
+            String userKey = getTokenKey(uuid);
+            LoginUser user = redisCache.getCacheObject(userKey);
+            return user;
+        }
+        return null;
+    }
+
+    /**
+     * 获取用户身份信息
+     *
+     * @return 用户信息
+     */
+    public LoginUser getLoginUserByRefreshToken(String refreshToken)
+    {
+        if (StringUtils.isNotEmpty(refreshToken))
+        {
+            String userKey = getTokenKey(refreshToken);
+            return redisCache.getCacheObject(userKey);
         }
         return null;
     }
@@ -120,17 +136,17 @@ public class TokenService
     /**
      * 验证令牌有效期，相差不足20分钟，自动刷新缓存
      * 
-     * @param token 令牌
-     * @return 令牌
+     * @param loginUser 登录用户
      */
     public void verifyToken(LoginUser loginUser)
     {
         long expireTime = loginUser.getExpireTime();
         long currentTime = System.currentTimeMillis();
-        if (expireTime - currentTime <= MILLIS_MINUTE_TEN)
-        {
-            refreshToken(loginUser);
-        }
+        // 过期时间小于一天，刷新refresh_token有效期
+//        if (expireTime - currentTime <= MILLIS_DAY)
+//        {
+//            refreshToken(loginUser);
+//        }
     }
 
     /**
@@ -161,17 +177,20 @@ public class TokenService
         loginUser.setBrowser(userAgent.getBrowser().getName());
         loginUser.setOs(userAgent.getOperatingSystem().getName());
     }
-    
+
     /**
      * 从数据声明生成令牌
      *
      * @param claims 数据声明
      * @return 令牌
      */
-    private String createToken(Map<String, Object> claims)
+    public String createToken(Map<String, Object> claims)
     {
+        // 增加Token过期时间，计算过期时间
+        long expMillis = System.currentTimeMillis() + expireTime * MILLIS_MINUTE;
         String token = Jwts.builder()
                 .setClaims(claims)
+                .setExpiration(new Date(expMillis))
                 .signWith(SignatureAlgorithm.HS512, secret).compact();
         return token;
     }

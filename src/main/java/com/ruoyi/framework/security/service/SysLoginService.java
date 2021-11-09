@@ -1,6 +1,9 @@
 package com.ruoyi.framework.security.service;
 
 import javax.annotation.Resource;
+
+import com.ruoyi.common.exception.RefreshTokenExpiredException;
+import com.ruoyi.framework.web.domain.LoginResult;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -23,6 +26,9 @@ import com.ruoyi.framework.security.LoginUser;
 import com.ruoyi.project.system.domain.SysUser;
 import com.ruoyi.project.system.service.ISysConfigService;
 import com.ruoyi.project.system.service.ISysUserService;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * 登录校验方法
@@ -56,7 +62,7 @@ public class SysLoginService
      * @param uuid 唯一标识
      * @return 结果
      */
-    public String login(String username, String password, String code, String uuid)
+    public LoginResult login(String username, String password, String code, String uuid)
     {
         boolean captchaOnOff = configService.selectCaptchaOnOff();
         // 验证码开关
@@ -89,7 +95,8 @@ public class SysLoginService
         LoginUser loginUser = (LoginUser) authentication.getPrincipal();
         recordLoginInfo(loginUser.getUserId());
         // 生成token
-        return tokenService.createToken(loginUser);
+        String token = tokenService.createToken(loginUser);
+        return new LoginResult(token, loginUser.getToken());
     }
 
     /**
@@ -130,4 +137,24 @@ public class SysLoginService
         sysUser.setLoginDate(DateUtils.getNowDate());
         userService.updateUserProfile(sysUser);
     }
+
+    /**
+     *
+     * @description: 刷新认证Token
+     * @author mingchenxu
+     * @date 2021/10/27 15:57
+     * @param refreshToken
+     * @return java.lang.String
+     */
+    public String refreshToken(String refreshToken) {
+        LoginUser loginUser = tokenService.getLoginUserByRefreshToken(refreshToken);
+        if (loginUser == null) {
+            throw new RefreshTokenExpiredException();
+        }
+        // 重新登录，获取token
+        Map<String, Object> claims = new HashMap<>();
+        claims.put(Constants.LOGIN_USER_KEY, loginUser.getToken());
+        return tokenService.createToken(claims);
+    }
+
 }

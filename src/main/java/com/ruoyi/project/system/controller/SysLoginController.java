@@ -1,7 +1,10 @@
 package com.ruoyi.project.system.controller;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+
+import com.ruoyi.framework.web.domain.LoginResult;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -45,9 +48,10 @@ public class SysLoginController
     {
         AjaxResult ajax = AjaxResult.success();
         // 生成令牌
-        String token = loginService.login(loginBody.getUsername(), loginBody.getPassword(), loginBody.getCode(),
+        LoginResult loginResult = loginService.login(loginBody.getUsername(), loginBody.getPassword(), loginBody.getCode(),
                 loginBody.getUuid());
-        ajax.put(Constants.TOKEN, token);
+        ajax.put(Constants.TOKEN, loginResult.getToken());
+        ajax.put(Constants.REFRESH_TOKEN, loginResult.getRefreshToken());
         return ajax;
     }
 
@@ -83,4 +87,20 @@ public class SysLoginController
         List<SysMenu> menus = menuService.selectMenuTreeByUserId(userId);
         return AjaxResult.success(menuService.buildMenus(menus));
     }
+
+    /**
+     *
+     * @description: 刷新Token
+     * @author mingchenxu
+     * @date 2021/10/27 15:55
+     * @param params 刷新Token
+     * @return com.ruoyi.common.core.domain.AjaxResult
+     */
+    @PostMapping("refreshToken")
+    public AjaxResult refreshToken(@RequestBody Map<String, String> params)
+    {
+        String refreshToken = params.get("refreshToken");
+        return AjaxResult.success("刷新成功", loginService.refreshToken(refreshToken));
+    }
+
 }
