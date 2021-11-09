@@ -81,6 +81,22 @@
             <artifactId>spring-boot-starter-security</artifactId>
         </dependency>
 
+        <!-- spring actuator 健康检测 -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-actuator</artifactId>
+        </dependency>
+
+        <!-- Jackson -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-json</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.datatype</groupId>
+            <artifactId>jackson-datatype-jsr310</artifactId>
+        </dependency>
+
         <!-- redis 缓存操作 -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -267,6 +283,35 @@
 
 	</dependencies>
 
+    <!--  定义配置文件  -->
+    <profiles>
+        <!--  配置文件  id 名字    properties 参数   -->
+        <profile>
+            <id>dev</id>
+            <!--默认激活当前配置-->
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <properties>
+                <profiles.active>dev</profiles.active>
+                <!--  众多参数配置 -->
+            </properties>
+        </profile>
+        <profile>
+            <id>prod</id>
+            <properties>
+                <profiles.active>prod</profiles.active>
+                <!--  众多参数配置 -->
+            </properties>
+        </profile>
+        <profile>
+            <id>test</id>
+            <properties>
+                <profiles.active>test</profiles.active>
+                <!--  众多参数配置 -->
+            </properties>
+        </profile>
+    </profiles>
 	<build>
 	    <finalName>${project.artifactId}</finalName>
 	    <plugins>
