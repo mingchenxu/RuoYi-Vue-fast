@@ -4,7 +4,6 @@ stages:
   - docker_build
   - deploy_k8s
 variables:
-  RUNNER_TAG: k8s-maven
   APP_NAME: ruoyi.jar
   KUBECONFIG: /etc/deploy/config
   MAVEN_OPTS: "-Dmaven.repo.local=/opt/cache/.m2/repository"
@@ -12,7 +11,7 @@ mvn_build_job:
   image: maven:3.8.3-jdk-8-slim
   stage: package
   tags:
-    - $RUNNER_TAG
+    - k8s-maven
   script:
     - mvn package -B -DskipTests
     - cp target/$APP_NAME /opt/cache
@@ -20,7 +19,7 @@ docker_build_job:
   image: docker:latest
   stage: docker_build
   tags:
-    - $RUNNER_TAG
+    - k8s-maven
   script:
     - docker login -u $REGISTRY_USERNAME -p $REGISTRY_PASSWORD registry.czinfo.net
     - mkdir target
@@ -31,7 +30,7 @@ deploy_k8s_job:
   image: registry.cn-hangzhou.aliyuncs.com/haoshuwei24/kubectl:1.16.6
   stage: deploy_k8s
   tags:
-    - $RUNNER_TAG
+    - k8s-maven
   script:
     - mkdir -p /etc/deploy
     - echo $kube_config |base64 -d > $KUBECONFIG
