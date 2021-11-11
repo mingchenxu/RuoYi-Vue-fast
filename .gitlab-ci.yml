@@ -8,7 +8,7 @@ variables:
   KUBECONFIG: /etc/deploy/config
   MAVEN_OPTS: "-Dmaven.repo.local=/opt/cache/.m2/repository"
 mvn_build_job:
-  image: maven:3.8.3-jdk-8-slim
+  image: registry.czinfo.net/library/maven:3.8.3-jdk-8-slim
   stage: package
   tags:
     - k8s-maven
