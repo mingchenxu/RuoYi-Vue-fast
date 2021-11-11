@@ -327,9 +327,9 @@
 
 	<repositories>
 	    <repository>
-	        <id>public</id>
-	        <name>aliyun nexus</name>
-	        <url>https://maven.aliyun.com/repository/public</url>
+	        <id>nexus</id>
+	        <name>local nexus</name>
+	        <url>http://10.10.210.19:30081/repository/maven-public/</url>
 	        <releases>
 	            <enabled>true</enabled>
 	        </releases>
@@ -338,9 +338,9 @@
 
 	<pluginRepositories>
 	    <pluginRepository>
-	        <id>public</id>
-	        <name>aliyun nexus</name>
-	        <url>https://maven.aliyun.com/repository/public</url>
+	        <id>nexus</id>
+	        <name>local nexus</name>
+	        <url>http://10.10.210.19:30081/repository/maven-public/</url>
 	        <releases>
 	            <enabled>true</enabled>
 	        </releases>
