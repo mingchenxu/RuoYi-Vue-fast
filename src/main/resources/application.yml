@@ -172,8 +172,19 @@ gen:
   # 表前缀（生成类名不会包含表前缀，多个用逗号分隔）
   tablePrefix: sys_
 
+# actuator 监控配置
 management:
+  # actuator端口 如果不配置做默认使用上面8080端口
+  #  server:
+  #    port: 9000
+  endpoints:
+    web:
+      exposure:
+        # 默认值访问health,info端点  用*可以包含全部端点
+        include: health
+      # 修改访问路径 2.0之前默认是/; 2.0默认是/actuator可以通过这个属性值修改
+      base-path: /probe
   endpoint:
     health:
       # 显示健康具体信息  默认不会显示详细信息
-      show-details: always
+      show-details: WHEN_AUTHORIZED

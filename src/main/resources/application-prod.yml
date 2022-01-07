@@ -35,3 +35,8 @@ token:
   # 令牌有效期（默认30分钟）
   expireTime: 30
   refreshExpireTime: 10080
+
+# Swagger配置，生产环境关闭
+swagger:
+  # 是否开启swagger
+  enabled: false
