@@ -2,7 +2,7 @@ package com.ruoyi.framework.security;
 
 /**
  * 用户登录对象
- * 
+ *
  * @author ruoyi
  */
 public class LoginBody
@@ -26,6 +26,11 @@ public class LoginBody
      * 唯一标识
      */
     private String uuid = "";
+
+    /**
+     * 滑动/点选认证参数
+     */
+    private String verification;
 
     public String getUsername()
     {
@@ -65,5 +70,13 @@ public class LoginBody
     public void setUuid(String uuid)
     {
         this.uuid = uuid;
+    }
+
+    public String getVerification() {
+        return verification;
+    }
+
+    public void setVerification(String verification) {
+        this.verification = verification;
     }
 }
