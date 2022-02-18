@@ -4,9 +4,10 @@ stages:
   - docker_build
   - deploy_k8s
 variables:
-  APP_NAME: ruoyi.jar
+  APP_NAME: "ruoyi.jar"
   KUBECONFIG: /etc/deploy/config
   MAVEN_OPTS: "-Dmaven.repo.local=/opt/cache/.m2/repository"
+  REGISTRY: "registry.czinfo.net"
 mvn_build_job:
   image: registry.czinfo.net/library/maven:3.8.3-jdk-8-slim
   stage: package
@@ -21,11 +22,12 @@ docker_build_job:
   tags:
     - k8s-maven
   script:
-    - docker login -u $REGISTRY_USERNAME -p $REGISTRY_PASSWORD registry.czinfo.net
+    - echo "Building Dockerfile-based application..."
+    - docker login -u $REGISTRY_USERNAME -p $REGISTRY_PASSWORD $REGISTRY
     - mkdir target
     - cp /opt/cache/$APP_NAME target/$APP_NAME
-    - docker build -t registry.czinfo.net/test/ruoyi-demo:$CI_PIPELINE_ID .
-    - docker push registry.czinfo.net/test/ruoyi-demo:$CI_PIPELINE_ID
+    - docker build -t $REGISTRY/test/ruoyi-demo:$CI_PIPELINE_ID .
+    - docker push $REGISTRY/test/ruoyi-demo:$CI_PIPELINE_ID
 deploy_k8s_job:
   image: registry.cn-hangzhou.aliyuncs.com/haoshuwei24/kubectl:1.16.6
   stage: deploy_k8s
