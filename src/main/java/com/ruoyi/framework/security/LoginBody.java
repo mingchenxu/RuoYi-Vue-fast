@@ -25,7 +25,7 @@ public class LoginBody
     /**
      * 唯一标识
      */
-    private String uuid = "";
+    private String uuid;
 
     /**
      * 滑动/点选认证参数

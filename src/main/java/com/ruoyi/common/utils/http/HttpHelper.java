@@ -4,9 +4,9 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import javax.servlet.ServletRequest;
-import org.apache.commons.lang.exception.ExceptionUtils;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,7 +25,7 @@ public class HttpHelper
         BufferedReader reader = null;
         try (InputStream inputStream = request.getInputStream())
         {
-            reader = new BufferedReader(new InputStreamReader(inputStream, Charset.forName("UTF-8")));
+            reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
             String line = "";
             while ((line = reader.readLine()) != null)
             {
@@ -46,7 +46,7 @@ public class HttpHelper
                 }
                 catch (IOException e)
                 {
-                    LOGGER.error(ExceptionUtils.getFullStackTrace(e));
+                    LOGGER.error(ExceptionUtils.getMessage(e));
                 }
             }
         }

@@ -86,6 +86,8 @@ public class ExcelUtil<T>
 {
     private static final Logger log = LoggerFactory.getLogger(ExcelUtil.class);
 
+    public static final String[] FORMULA_STR = { "=", "-", "+", "@" };
+
     /**
      * Excel sheet最大行数，默认65536
      */
@@ -431,7 +433,7 @@ public class ExcelUtil<T>
      * @return 结果
      * @throws IOException
      */
-    public void exportExcel(HttpServletResponse response, List<T> list, String sheetName)throws IOException
+    public void exportExcel(HttpServletResponse response, List<T> list, String sheetName)
     {
         exportExcel(response, list, sheetName, StringUtils.EMPTY);
     }
@@ -446,12 +448,12 @@ public class ExcelUtil<T>
      * @return 结果
      * @throws IOException
      */
-    public void exportExcel(HttpServletResponse response, List<T> list, String sheetName, String title) throws IOException
+    public void exportExcel(HttpServletResponse response, List<T> list, String sheetName, String title)
     {
         response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
         response.setCharacterEncoding("utf-8");
         this.init(list, sheetName, title, Type.EXPORT);
-        exportExcel(response.getOutputStream());
+        exportExcel(response);
     }
 
     /**
@@ -484,7 +486,7 @@ public class ExcelUtil<T>
      * @param sheetName 工作表的名称
      * @return 结果
      */
-    public void importTemplateExcel(HttpServletResponse response, String sheetName) throws IOException
+    public void importTemplateExcel(HttpServletResponse response, String sheetName)
     {
         importTemplateExcel(response, sheetName, StringUtils.EMPTY);
     }
@@ -496,12 +498,12 @@ public class ExcelUtil<T>
      * @param title 标题
      * @return 结果
      */
-    public void importTemplateExcel(HttpServletResponse response, String sheetName, String title) throws IOException
+    public void importTemplateExcel(HttpServletResponse response, String sheetName, String title)
     {
         response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
         response.setCharacterEncoding("utf-8");
         this.init(null, sheetName, title, Type.IMPORT);
-        exportExcel(response.getOutputStream());
+        exportExcel(response);
     }
 
     /**
@@ -509,12 +511,12 @@ public class ExcelUtil<T>
      * 
      * @return 结果
      */
-    public void exportExcel(OutputStream out)
+    public void exportExcel(HttpServletResponse response)
     {
         try
         {
             writeSheet();
-            wb.write(out);
+            wb.write(response.getOutputStream());
         }
         catch (Exception e)
         {
@@ -523,7 +525,6 @@ public class ExcelUtil<T>
         finally
         {
             IOUtils.closeQuietly(wb);
-            IOUtils.closeQuietly(out);
         }
     }
 
@@ -711,7 +712,13 @@ public class ExcelUtil<T>
     {
         if (ColumnType.STRING == attr.cellType())
         {
-            cell.setCellValue(StringUtils.isNull(value) ? attr.defaultValue() : value + attr.suffix());
+            String cellValue = Convert.toStr(value);
+            // 对于任何以表达式触发字符 =-+@开头的单元格，直接使用tab字符作为前缀，防止CSV注入。
+            if (StringUtils.containsAny(cellValue, FORMULA_STR))
+            {
+                cellValue = StringUtils.replaceEach(cellValue, FORMULA_STR, new String[] { "\t=", "\t-", "\t+", "\t@" });
+            }
+            cell.setCellValue(StringUtils.isNull(cellValue) ? attr.defaultValue() : cellValue + attr.suffix());
         }
         else if (ColumnType.NUMERIC == attr.cellType())
         {
@@ -1114,7 +1121,7 @@ public class ExcelUtil<T>
         if (StringUtils.isNotEmpty(excel.targetAttr()))
         {
             String target = excel.targetAttr();
-            if (target.indexOf(".") > -1)
+            if (target.contains("."))
             {
                 String[] targets = target.split("[.]");
                 for (String name : targets)
@@ -1209,7 +1216,7 @@ public class ExcelUtil<T>
         for (Object[] os : this.fields)
         {
             Excel excel = (Excel) os[1];
-            maxHeight = maxHeight > excel.height() ? maxHeight : excel.height();
+            maxHeight = Math.max(maxHeight, excel.height());
         }
         return (short) (maxHeight * 20);
     }

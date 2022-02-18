@@ -5,7 +5,7 @@
 
     <groupId>com.ruoyi</groupId>
     <artifactId>ruoyi</artifactId>
-    <version>3.7.0</version>
+    <version>3.8.1</version>
     <packaging>jar</packaging>
 
     <name>ruoyi</name>
@@ -15,7 +15,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>2.5.6</version>
+        <version>2.5.9</version>
         <relativePath />
     </parent>
 
@@ -26,7 +26,7 @@
         <maven-jar-plugin.version>3.1.1</maven-jar-plugin.version>
         <mybatis.spring.boot.starter.version>2.2.0</mybatis.spring.boot.starter.version>
         <pagehelper.spring.boot.starter.version>1.4.0</pagehelper.spring.boot.starter.version>
-        <fastjson.version>1.2.78</fastjson.version>
+        <fastjson.version>1.2.79</fastjson.version>
         <druid.version>1.2.8</druid.version>
         <commons.io.version>2.11.0</commons.io.version>
         <commons.fileupload.version>1.4</commons.fileupload.version>
@@ -36,9 +36,9 @@
         <kaptcha.version>2.3.2</kaptcha.version>
         <swagger.version>3.0.0</swagger.version>
         <poi.version>4.1.2</poi.version>
-        <oshi.version>5.8.2</oshi.version>
-        <jna.version>5.9.0</jna.version>
-        <velocity.version>1.7</velocity.version>
+        <oshi.version>5.8.6</oshi.version>
+        <jna.version>5.10.0</jna.version>
+        <velocity.version>2.3</velocity.version>
     </properties>
 
     <dependencies>
@@ -233,14 +233,8 @@
         <!-- velocity代码生成使用模板 -->
         <dependency>
             <groupId>org.apache.velocity</groupId>
-            <artifactId>velocity</artifactId>
+            <artifactId>velocity-engine-core</artifactId>
             <version>${velocity.version}</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>commons-collections</groupId>
-                    <artifactId>commons-collections</artifactId>
-                </exclusion>
-            </exclusions>
         </dependency>
 
         <!-- collections工具类 -->
