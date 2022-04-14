@@ -25,6 +25,7 @@
         <java.version>1.8</java.version>
         <maven-jar-plugin.version>3.1.1</maven-jar-plugin.version>
         <mybatis.spring.boot.starter.version>2.2.0</mybatis.spring.boot.starter.version>
+        <mybatis.plus.version>3.5.1</mybatis.plus.version>
         <pagehelper.spring.boot.starter.version>1.4.0</pagehelper.spring.boot.starter.version>
         <fastjson.version>1.2.79</fastjson.version>
         <druid.version>1.2.8</druid.version>
@@ -121,6 +122,13 @@
             <groupId>org.mybatis.spring.boot</groupId>
             <artifactId>mybatis-spring-boot-starter</artifactId>
             <version>${mybatis.spring.boot.starter.version}</version>
+        </dependency>
+
+        <!-- mybatis-plus 增强CRUD -->
+        <dependency>
+            <groupId>com.baomidou</groupId>
+            <artifactId>mybatis-plus-boot-starter</artifactId>
+            <version>${mybatis.plus.version}</version>
         </dependency>
 
         <!-- pagehelper 分页插件 -->
