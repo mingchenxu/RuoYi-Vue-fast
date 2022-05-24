@@ -15,7 +15,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>2.5.12</version>
+        <version>2.5.13</version>
         <relativePath />
     </parent>
 
@@ -30,7 +30,7 @@
         <fastjson.version>1.2.79</fastjson.version>
         <mybatis.spring.boot.starter.version>2.2.2</mybatis.spring.boot.starter.version>
         <pagehelper.spring.boot.starter.version>1.4.1</pagehelper.spring.boot.starter.version>
-        <fastjson.version>1.2.80</fastjson.version>
+        <fastjson.version>1.2.83</fastjson.version>
         <druid.version>1.2.8</druid.version>
         <commons.io.version>2.11.0</commons.io.version>
         <commons.fileupload.version>1.4</commons.fileupload.version>
@@ -40,8 +40,7 @@
         <kaptcha.version>2.3.2</kaptcha.version>
         <swagger.version>3.0.0</swagger.version>
         <poi.version>4.1.2</poi.version>
-        <oshi.version>6.1.2</oshi.version>
-        <jna.version>5.10.0</jna.version>
+        <oshi.version>6.1.6</oshi.version>
         <velocity.version>2.3</velocity.version>
     </properties>
 
