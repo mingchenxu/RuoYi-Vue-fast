@@ -99,6 +99,11 @@ public class ExcelUtil<T>
     public static final String[] FORMULA_STR = { "=", "-", "+", "@" };
 
     /**
+     * 用于dictType属性数据存储，避免重复查缓存
+     */
+    public Map<String, String> sysDictMap = new HashMap<String, String>();
+
+    /**
      * Excel sheet最大行数，默认65536
      */
     public static final int sheetSize = 65536;
@@ -1034,7 +1039,12 @@ public class ExcelUtil<T>
                 }
                 else if (StringUtils.isNotEmpty(dictType) && StringUtils.isNotNull(value))
                 {
-                    cell.setCellValue(convertDictByExp(Convert.toStr(value), dictType, separator));
+                    if (!sysDictMap.containsKey(dictType + value))
+                    {
+                        String lable = convertDictByExp(Convert.toStr(value), dictType, separator);
+                        sysDictMap.put(dictType + value, lable);
+                    }
+                    cell.setCellValue(sysDictMap.get(dictType + value));
                 }
                 else if (value instanceof BigDecimal && -1 != attr.scale())
                 {
@@ -1321,7 +1331,7 @@ public class ExcelUtil<T>
      */
     public String encodingFilename(String filename)
     {
-        filename = UUID.randomUUID().toString() + "_" + filename + ".xlsx";
+        filename = UUID.randomUUID() + "_" + filename + ".xlsx";
         return filename;
     }
 
@@ -1440,7 +1450,8 @@ public class ExcelUtil<T>
                     Excel[] excels = attrs.value();
                     for (Excel attr : excels)
                     {
-                        if (attr != null && (attr.type() == Type.ALL || attr.type() == type))
+                        if (!ArrayUtils.contains(this.excludeFields, field.getName() + "." + attr.targetAttr())
+                                && (attr != null && (attr.type() == Type.ALL || attr.type() == type)))
                         {
                             field.setAccessible(true);
                             fields.add(new Object[] { field, attr });
@@ -1598,7 +1609,7 @@ public class ExcelUtil<T>
                     HSSFPicture pic = (HSSFPicture) shape;
                     int pictureIndex = pic.getPictureIndex() - 1;
                     HSSFPictureData picData = pictures.get(pictureIndex);
-                    String picIndex = String.valueOf(anchor.getRow1()) + "_" + String.valueOf(anchor.getCol1());
+                    String picIndex = anchor.getRow1() + "_" + anchor.getCol1();
                     sheetIndexPicMap.put(picIndex, picData);
                 }
             }

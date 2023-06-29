@@ -15,7 +15,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>2.5.14</version>
+        <version>2.5.15</version>
         <relativePath />
     </parent>
 
@@ -25,18 +25,19 @@
         <java.version>1.8</java.version>
         <maven-jar-plugin.version>3.1.1</maven-jar-plugin.version>
         <pagehelper.spring.boot.starter.version>1.4.6</pagehelper.spring.boot.starter.version>
+        <fastjson.version>2.0.34</fastjson.version>
+        <druid.version>1.2.16</druid.version>
         <fastjson.version>2.0.23</fastjson.version>
         <druid.version>1.2.15</druid.version>
         <mybatis.plus.version>3.5.1</mybatis.plus.version>
         <commons.io.version>2.11.0</commons.io.version>
-        <commons.fileupload.version>1.4</commons.fileupload.version>
         <commons.collections.version>3.2.2</commons.collections.version>
         <bitwalker.version>1.21</bitwalker.version>
         <jwt.version>0.9.1</jwt.version>
         <kaptcha.version>2.3.3</kaptcha.version>
         <swagger.version>3.0.0</swagger.version>
         <poi.version>4.1.2</poi.version>
-        <oshi.version>6.4.0</oshi.version>
+        <oshi.version>6.4.3</oshi.version>
         <velocity.version>2.3</velocity.version>
     </properties>
 
@@ -127,6 +128,16 @@
             <groupId>com.github.pagehelper</groupId>
             <artifactId>pagehelper-spring-boot-starter</artifactId>
             <version>${pagehelper.spring.boot.starter.version}</version>
+            <exclusions>
+                <exclusion>
+                    <artifactId>mybatis</artifactId>
+                    <groupId>org.mybatis</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>mybatis-spring</artifactId>
+                    <groupId>org.mybatis</groupId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
         <!-- 阿里数据库连接池 -->
@@ -153,13 +164,6 @@
             <groupId>commons-io</groupId>
             <artifactId>commons-io</artifactId>
             <version>${commons.io.version}</version>
-        </dependency>
-
-        <!-- 文件上传工具类 -->
-        <dependency>
-            <groupId>commons-fileupload</groupId>
-            <artifactId>commons-fileupload</artifactId>
-            <version>${commons.fileupload.version}</version>
         </dependency>
 
         <!-- 解析客户端操作系统、浏览器等 -->
@@ -262,7 +266,7 @@
             <version>${kaptcha.version}</version>
             <exclusions>
                 <exclusion>
-                    <artifactId>javax.servlet-api</artifactId>
+                    <artifactId>servlet-api</artifactId>
                     <groupId>javax.servlet</groupId>
                 </exclusion>
             </exclusions>

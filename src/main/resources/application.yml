@@ -12,7 +12,7 @@ ruoyi:
   profile: D:/ruoyi/uploadPath
   # 获取ip地址开关
   addressEnabled: false
-  # 验证码类型 math 数组计算 char 字符验证
+  # 验证码类型 math 数字计算 char 字符验证
   captchaType: math
 
 # 开发环境配置
@@ -60,6 +60,10 @@ druidDataSource: &druidDataSource # 别名
     maxActive: 20
     # 配置获取连接等待超时的时间
     maxWait: 60000
+    # 配置连接超时时间
+    connectTimeout: 30000
+    # 配置网络超时时间
+    socketTimeout: 60000
     # 配置间隔多久才进行一次检测，检测需要关闭的空闲连接，单位是毫秒
     timeBetweenEvictionRunsMillis: 60000
     # 配置一个连接在池中最小生存的时间，单位是毫秒
@@ -100,7 +104,7 @@ spring:
     # 国际化资源文件路径
     basename: i18n/messages
   profiles:
-    active: @profiles.active@ # 指定活动配置文件
+    active: dev # 指定活动配置文件
   # 文件上传
   servlet:
      multipart:
