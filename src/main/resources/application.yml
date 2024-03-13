@@ -209,7 +209,7 @@ aj:
     # 缓存local/redis，内存缓存只适合单节点部署的应用，否则验证码生产与验证在节点之间信息不同步，导致失败
     cache-type: redis
     # 滑动验证，底图路径，不配置将使用默认图片
-    # jigsaw: classpath:images/jigsaw
+    jigsaw: classpath:images/jigsaw
     # 验证码类型default两种都实例化
     type: default
     # 水印
