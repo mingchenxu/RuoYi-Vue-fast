@@ -35,6 +35,7 @@
         <poi.version>4.1.2</poi.version>
         <oshi.version>6.4.13</oshi.version>
         <velocity.version>2.3</velocity.version>
+        <mybatis.plus.version>3.5.5</mybatis.plus.version>
     </properties>
 
     <dependencies>
