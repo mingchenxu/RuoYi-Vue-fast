@@ -23,6 +23,9 @@ import com.ruoyi.framework.web.domain.AjaxResult;
 import com.ruoyi.project.system.domain.SysUser;
 import com.ruoyi.project.system.service.ISysUserService;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 /**
  * 个人信息 业务处理
  * 
@@ -89,6 +92,14 @@ public class SysProfileController extends BaseController
     @PutMapping("/updatePwd")
     public AjaxResult updatePwd(String oldPassword, String newPassword)
     {
+        // 至少包含字母、数字、特殊字符，6-12位
+        String regex = "^(?=.*\\d)(?=.*[a-zA-Z])(?=.*[^\\da-zA-Z\\s]).{8,32}$";
+        Pattern pattern = Pattern.compile(regex);
+        // 将字符串与正则表达式匹配
+        Matcher matcher = pattern.matcher(newPassword);
+        if(!matcher.matches()){
+            return AjaxResult.error("密码必须包含字母、数字、特殊字符，最少8位字符");
+        }
         LoginUser loginUser = getLoginUser();
         String userName = loginUser.getUsername();
         String password = loginUser.getPassword();

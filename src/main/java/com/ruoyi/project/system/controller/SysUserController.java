@@ -1,6 +1,8 @@
 package com.ruoyi.project.system.controller;
 
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.lang3.ArrayUtils;
@@ -124,6 +126,14 @@ public class SysUserController extends BaseController
     @PostMapping
     public AjaxResult add(@Validated @RequestBody SysUser user)
     {
+        // 至少包含字母、数字、特殊字符，6-12位
+        String regex = "^(?=.*\\d)(?=.*[a-zA-Z])(?=.*[^\\da-zA-Z\\s]).{8,32}$";
+        Pattern pattern = Pattern.compile(regex);
+        // 将字符串与正则表达式匹配
+        Matcher matcher = pattern.matcher(user.getPassword());
+        if(!matcher.matches()){
+            return AjaxResult.error("密码必须包含字母、数字、特殊字符，最少8位字符");
+        }
         deptService.checkDeptDataScope(user.getDeptId());
         roleService.checkRoleDataScope(user.getRoleIds());
         if (!userService.checkUserNameUnique(user))
@@ -194,6 +204,14 @@ public class SysUserController extends BaseController
     @PutMapping("/resetPwd")
     public AjaxResult resetPwd(@RequestBody SysUser user)
     {
+        // 至少包含字母、数字、特殊字符，6-12位
+        String regex = "^(?=.*\\d)(?=.*[a-zA-Z])(?=.*[^\\da-zA-Z\\s]).{8,32}$";
+        Pattern pattern = Pattern.compile(regex);
+        // 将字符串与正则表达式匹配
+        Matcher matcher = pattern.matcher(user.getPassword());
+        if(!matcher.matches()){
+            return AjaxResult.error("密码必须包含字母、数字、特殊字符，最少8位字符");
+        }
         userService.checkUserAllowed(user);
         userService.checkUserDataScope(user.getUserId());
         user.setPassword(SecurityUtils.encryptPassword(user.getPassword()));
