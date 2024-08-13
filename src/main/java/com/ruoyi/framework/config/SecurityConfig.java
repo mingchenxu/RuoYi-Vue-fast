@@ -1,14 +1,19 @@
 package com.ruoyi.framework.config;
 
+import com.ruoyi.framework.security.sms.SmsCodeAuthenticationProvider;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
+import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
+import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -28,13 +33,21 @@ import com.ruoyi.framework.security.handle.LogoutSuccessHandlerImpl;
  */
 @EnableMethodSecurity(prePostEnabled = true, securedEnabled = true)
 @Configuration
-public class SecurityConfig
+public class SecurityConfig extends WebSecurityConfigurerAdapter
 {
     /**
      * 自定义用户认证逻辑
      */
     @Autowired
+    @Qualifier("userDetailsServiceImpl")
     private UserDetailsService userDetailsService;
+
+    /**
+     * 社区单点登录认证逻辑
+     */
+    @Autowired
+    @Qualifier("userDetailsBySmsCodeServiceImpl")
+    private UserDetailsService userDetailsBySmsCodeServiceImpl;
 
     /**
      * 认证失败处理类
@@ -67,15 +80,16 @@ public class SecurityConfig
     private PermitAllUrlProperties permitAllUrl;
 
     /**
-     * 身份验证实现
+     * 解决 无法直接注入 AuthenticationManager
+     *
+     * @return
+     * @throws Exception
      */
     @Bean
-    public AuthenticationManager authenticationManager()
+    @Override
+    public AuthenticationManager authenticationManagerBean() throws Exception
     {
-        DaoAuthenticationProvider daoAuthenticationProvider = new DaoAuthenticationProvider();
-        daoAuthenticationProvider.setUserDetailsService(userDetailsService);
-        daoAuthenticationProvider.setPasswordEncoder(bCryptPasswordEncoder());
-        return new ProviderManager(daoAuthenticationProvider);
+        return super.authenticationManagerBean();
     }
 
     /**
@@ -96,6 +110,9 @@ public class SecurityConfig
     @Bean
     protected SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception
     {
+        SmsCodeAuthenticationProvider smsCodeAuthenticationProvider = new SmsCodeAuthenticationProvider();
+        smsCodeAuthenticationProvider.setUserDetailsService(userDetailsBySmsCodeServiceImpl);
+
         return httpSecurity
             // CSRF禁用，因为不使用session
             .csrf(csrf -> csrf.disable())
@@ -111,7 +128,7 @@ public class SecurityConfig
             .authorizeHttpRequests((requests) -> {
                 permitAllUrl.getUrls().forEach(url -> requests.antMatchers(url).permitAll());
                 // 对于登录login 注册register 验证码captchaImage 允许匿名访问
-                requests.antMatchers("/login", "/register", "/captchaImage").permitAll()
+                requests.antMatchers("/login", "/register", "/captchaImage","/captchaSms","/loginBySmsCode").permitAll()
                     // 静态资源，可匿名访问
                     .antMatchers(HttpMethod.GET, "/", "/*.html", "/**/*.html", "/**/*.css", "/**/*.js", "/profile/**").permitAll()
                     .antMatchers("/swagger-ui.html", "/swagger-resources/**", "/webjars/**", "/*/api-docs", "/druid/**").permitAll()
@@ -127,6 +144,8 @@ public class SecurityConfig
             // 添加CORS filter
             .addFilterBefore(corsFilter, JwtAuthenticationTokenFilter.class)
             .addFilterBefore(corsFilter, LogoutFilter.class)
+            //增加短信登录
+            .authenticationProvider(smsCodeAuthenticationProvider)
             .build();
     }
 
@@ -137,5 +156,14 @@ public class SecurityConfig
     public BCryptPasswordEncoder bCryptPasswordEncoder()
     {
         return new BCryptPasswordEncoder();
+    }
+
+    /**
+     * 身份认证接口
+     */
+    @Override
+    protected void configure(AuthenticationManagerBuilder auth) throws Exception
+    {
+        auth.userDetailsService(userDetailsService).passwordEncoder(bCryptPasswordEncoder());
     }
 }

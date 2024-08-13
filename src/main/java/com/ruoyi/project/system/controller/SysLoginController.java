@@ -3,15 +3,20 @@ package com.ruoyi.project.system.controller;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 import com.anji.captcha.model.common.ResponseModel;
 import com.anji.captcha.model.vo.CaptchaVO;
 import com.anji.captcha.service.CaptchaService;
 import com.ruoyi.common.exception.user.CaptchaException;
 import com.ruoyi.common.utils.MessageUtils;
+import com.ruoyi.common.utils.RandomUtil;
+import com.ruoyi.common.utils.SpringEnvHelper;
 import com.ruoyi.framework.manager.AsyncManager;
 import com.ruoyi.framework.manager.factory.AsyncFactory;
+import com.ruoyi.framework.redis.RedisCache;
 import com.ruoyi.framework.web.domain.LoginResult;
+import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -48,6 +53,9 @@ public class SysLoginController
 
     @Autowired
     private CaptchaService captchaService;
+
+    @Autowired
+    private RedisCache redisCache;
 
     /**
      * 登录方法
@@ -135,6 +143,45 @@ public class SysLoginController
             AsyncManager.me().execute(AsyncFactory.recordLogininfor(username, Constants.LOGIN_FAIL, MessageUtils.message("user.jcaptcha.error")));
             throw new CaptchaException();
         }
+    }
+
+    /**
+     * 获取短信验证码
+     */
+    @ApiOperation("获取短信验证码")
+    @PostMapping("/captchaSms")
+    public AjaxResult getCaptcha(@RequestBody LoginBody loginBody)
+    {
+        // 增加滑动/点选校验
+        verifyCaptcha(loginBody.getUsername(), loginBody.getCode());
+        if(redisCache.getCacheObject(loginBody.getUsername()) != null){
+            throw new SecurityException("短信验证码发送太快，请稍后再试");
+        }
+        String captcha = "888888";
+        if(SpringEnvHelper.isProd()){
+            // 随机六位数验证码
+            captcha = RandomUtil.generateDigitalString(6);
+        }
+        // todo 发送验证码
+        //设置验证码超时1分钟
+        redisCache.setCacheObject(loginBody.getUsername(),captcha,1, TimeUnit.MINUTES);
+        return AjaxResult.success();
+    }
+
+    /**
+     * 登录方法(手机短信验证码)
+     *
+     * @param loginBody 登录信息
+     * @return 结果
+     */
+    @PostMapping("/loginBySmsCode")
+    public AjaxResult loginBySmsCode(@RequestBody LoginBody loginBody)
+    {
+        AjaxResult ajax = AjaxResult.success();
+        // 生成令牌
+        String token = loginService.loginBySmsCode(loginBody.getUsername(), loginBody.getCode());
+        ajax.put(Constants.TOKEN, token);
+        return ajax;
     }
 
 }

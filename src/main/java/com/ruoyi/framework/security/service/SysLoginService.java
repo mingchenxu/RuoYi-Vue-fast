@@ -3,6 +3,7 @@ package com.ruoyi.framework.security.service;
 import javax.annotation.Resource;
 
 import com.ruoyi.common.exception.RefreshTokenExpiredException;
+import com.ruoyi.framework.security.sms.SmsCodeAuthenticationToken;
 import com.ruoyi.framework.web.domain.LoginResult;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -34,6 +35,7 @@ import com.ruoyi.project.system.service.ISysUserService;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 /**
  * 登录校验方法
@@ -203,6 +205,61 @@ public class SysLoginService
         Map<String, Object> claims = new HashMap<>();
         claims.put(Constants.LOGIN_USER_KEY, loginUser.getToken());
         return tokenService.createToken(claims);
+    }
+
+    /**
+     * 手机验证码登录验证
+     *
+     * @param mobile 手机号
+     * @param code      验证码
+     * @return 结果
+     */
+    public String loginBySmsCode(String mobile, String code) {
+        String captcha = redisCache.getCacheObject(mobile);
+        //获取验证码错误次数
+        String captchaErrorKey = CacheConstants.CAPTCHA_ERROR_COUNT+mobile;
+        Integer captchaError = redisCache.getCacheObject(captchaErrorKey);
+        if(captchaError == null){
+            captchaError = 0;
+        }
+        //验证码错误次数大于10，则锁定1小时不再验证
+        if(captchaError >= 10){
+            redisCache.setCacheObject(captchaErrorKey,captchaError,1, TimeUnit.HOURS);
+            throw new ServiceException("验证码错误次数过多，请1小时后再试");
+        }
+        if (captcha == null) {
+            AsyncManager.me().execute(AsyncFactory.recordLogininfor(mobile, Constants.LOGIN_FAIL, MessageUtils.message("user.jcaptcha.expire")));
+            throw new CaptchaExpireException();
+        }
+        if (!code.equalsIgnoreCase(captcha)) {
+            //验证失败次数加1
+            captchaError++;
+            redisCache.setCacheObject(captchaErrorKey,captchaError,1, TimeUnit.MINUTES);
+            AsyncManager.me().execute(AsyncFactory.recordLogininfor(mobile, Constants.LOGIN_FAIL, MessageUtils.message("user.jcaptcha.error")));
+            throw new CaptchaException();
+        }
+        //验证通过再删除
+        redisCache.deleteObject(mobile);
+        redisCache.deleteObject(captchaErrorKey);
+        // 用户验证
+        Authentication authentication = null;
+        try {
+            // 该方法会去调用UserDetailsBySmsCodeServiceImpl.loadUserByUsername
+            authentication = authenticationManager
+                    .authenticate(new SmsCodeAuthenticationToken(mobile));
+        } catch (Exception e) {
+            if (e instanceof BadCredentialsException) {
+                AsyncManager.me().execute(AsyncFactory.recordLogininfor(mobile, Constants.LOGIN_FAIL, MessageUtils.message("user.password.not.match")));
+                throw new UserPasswordNotMatchException();
+            } else {
+                AsyncManager.me().execute(AsyncFactory.recordLogininfor(mobile, Constants.LOGIN_FAIL, e.getMessage()));
+                throw new ServiceException(e.getMessage());
+            }
+        }
+        AsyncManager.me().execute(AsyncFactory.recordLogininfor(mobile, Constants.LOGIN_SUCCESS, MessageUtils.message("user.login.success")));
+        LoginUser loginUser = (LoginUser) authentication.getPrincipal();
+        // 生成token
+        return tokenService.createToken(loginUser);
     }
 
 }
