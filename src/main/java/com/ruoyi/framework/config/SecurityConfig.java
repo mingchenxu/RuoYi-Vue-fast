@@ -33,7 +33,7 @@ import com.ruoyi.framework.security.handle.LogoutSuccessHandlerImpl;
  */
 @EnableMethodSecurity(prePostEnabled = true, securedEnabled = true)
 @Configuration
-public class SecurityConfig extends WebSecurityConfigurerAdapter
+public class SecurityConfig
 {
     /**
      * 自定义用户认证逻辑
@@ -80,16 +80,15 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter
     private PermitAllUrlProperties permitAllUrl;
 
     /**
-     * 解决 无法直接注入 AuthenticationManager
-     *
-     * @return
-     * @throws Exception
+     * 身份验证实现
      */
     @Bean
-    @Override
-    public AuthenticationManager authenticationManagerBean() throws Exception
+    public AuthenticationManager authenticationManager()
     {
-        return super.authenticationManagerBean();
+        DaoAuthenticationProvider daoAuthenticationProvider = new DaoAuthenticationProvider();
+        daoAuthenticationProvider.setUserDetailsService(userDetailsService);
+        daoAuthenticationProvider.setPasswordEncoder(bCryptPasswordEncoder());
+        return new ProviderManager(daoAuthenticationProvider);
     }
 
     /**
@@ -156,14 +155,5 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter
     public BCryptPasswordEncoder bCryptPasswordEncoder()
     {
         return new BCryptPasswordEncoder();
-    }
-
-    /**
-     * 身份认证接口
-     */
-    @Override
-    protected void configure(AuthenticationManagerBuilder auth) throws Exception
-    {
-        auth.userDetailsService(userDetailsService).passwordEncoder(bCryptPasswordEncoder());
     }
 }
