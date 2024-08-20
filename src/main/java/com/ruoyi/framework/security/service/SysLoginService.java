@@ -234,7 +234,7 @@ public class SysLoginService
         if (!code.equalsIgnoreCase(captcha)) {
             //验证失败次数加1
             captchaError++;
-            redisCache.setCacheObject(captchaErrorKey,captchaError,1, TimeUnit.MINUTES);
+            redisCache.setCacheObject(captchaErrorKey,captchaError,5, TimeUnit.MINUTES);
             AsyncManager.me().execute(AsyncFactory.recordLogininfor(mobile, Constants.LOGIN_FAIL, MessageUtils.message("user.jcaptcha.error")));
             throw new CaptchaException();
         }

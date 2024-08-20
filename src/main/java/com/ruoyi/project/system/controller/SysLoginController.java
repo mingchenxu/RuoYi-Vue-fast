@@ -154,17 +154,14 @@ public class SysLoginController
     {
         // 增加滑动/点选校验
         verifyCaptcha(loginBody.getUsername(), loginBody.getCode());
-        if(redisCache.getCacheObject(loginBody.getUsername()) != null){
-            throw new SecurityException("短信验证码发送太快，请稍后再试");
-        }
         String captcha = "888888";
         if(SpringEnvHelper.isProd()){
             // 随机六位数验证码
             captcha = RandomUtil.generateDigitalString(6);
         }
         // todo 发送验证码
-        //设置验证码超时1分钟
-        redisCache.setCacheObject(loginBody.getUsername(),captcha,1, TimeUnit.MINUTES);
+        //设置验证码超时5分钟
+        redisCache.setCacheObject(loginBody.getUsername(),captcha,5, TimeUnit.MINUTES);
         return AjaxResult.success();
     }
 
