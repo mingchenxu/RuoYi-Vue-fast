@@ -9,9 +9,7 @@ import com.anji.captcha.model.common.ResponseModel;
 import com.anji.captcha.model.vo.CaptchaVO;
 import com.anji.captcha.service.CaptchaService;
 import com.ruoyi.common.exception.user.CaptchaException;
-import com.ruoyi.common.utils.MessageUtils;
-import com.ruoyi.common.utils.RandomUtil;
-import com.ruoyi.common.utils.SpringEnvHelper;
+import com.ruoyi.common.utils.*;
 import com.ruoyi.framework.manager.AsyncManager;
 import com.ruoyi.framework.manager.factory.AsyncFactory;
 import com.ruoyi.framework.redis.RedisCache;
@@ -24,7 +22,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import com.ruoyi.common.constant.Constants;
-import com.ruoyi.common.utils.SecurityUtils;
 import com.ruoyi.framework.security.LoginBody;
 import com.ruoyi.framework.security.service.SysLoginService;
 import com.ruoyi.framework.security.service.SysPermissionService;
@@ -68,6 +65,9 @@ public class SysLoginController
     {
         // 增加滑动/点选校验
         verifyCaptcha(loginBody.getUsername(), loginBody.getVerification());
+        //解密用户名和密码
+        loginBody.setUsername(AesGcmUtil.decrypt(loginBody.getUsername()));
+        loginBody.setPassword(AesGcmUtil.decrypt(loginBody.getPassword()));
         AjaxResult ajax = AjaxResult.success();
         // 生成令牌
         LoginResult loginResult = loginService.login(loginBody.getUsername(), loginBody.getPassword(), loginBody.getCode(),

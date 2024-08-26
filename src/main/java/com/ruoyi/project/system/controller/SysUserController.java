@@ -5,6 +5,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletResponse;
+
+import com.ruoyi.project.system.service.*;
 import org.apache.commons.lang3.ArrayUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -29,10 +31,6 @@ import com.ruoyi.framework.web.page.TableDataInfo;
 import com.ruoyi.project.system.domain.SysDept;
 import com.ruoyi.project.system.domain.SysRole;
 import com.ruoyi.project.system.domain.SysUser;
-import com.ruoyi.project.system.service.ISysDeptService;
-import com.ruoyi.project.system.service.ISysPostService;
-import com.ruoyi.project.system.service.ISysRoleService;
-import com.ruoyi.project.system.service.ISysUserService;
 
 /**
  * 用户信息
@@ -54,6 +52,9 @@ public class SysUserController extends BaseController
 
     @Autowired
     private ISysPostService postService;
+
+    @Autowired
+    private ISysConfigService configService;
 
     /**
      * 获取用户列表
@@ -132,7 +133,11 @@ public class SysUserController extends BaseController
         // 将字符串与正则表达式匹配
         Matcher matcher = pattern.matcher(user.getPassword());
         if(!matcher.matches()){
-            return AjaxResult.error("密码必须包含字母、数字、特殊字符，最少8位字符");
+            return error("密码必须包含字母、数字、特殊字符，最少8位字符");
+        }
+        String limitPassword = configService.selectConfigByKey("sys.password.blackList");
+        if(StringUtils.isNotEmpty(limitPassword) && limitPassword.contains(user.getPassword())){
+            return error("此密码在黑名单中，请重新设置密码");
         }
         deptService.checkDeptDataScope(user.getDeptId());
         roleService.checkRoleDataScope(user.getRoleIds());
@@ -211,6 +216,10 @@ public class SysUserController extends BaseController
         Matcher matcher = pattern.matcher(user.getPassword());
         if(!matcher.matches()){
             return AjaxResult.error("密码必须包含字母、数字、特殊字符，最少8位字符");
+        }
+        String limitPassword = configService.selectConfigByKey("sys.password.blackList");
+        if(StringUtils.isNotEmpty(limitPassword) && limitPassword.contains(user.getPassword())){
+            return error("此密码在黑名单中，请重新设置密码");
         }
         userService.checkUserAllowed(user);
         userService.checkUserDataScope(user.getUserId());

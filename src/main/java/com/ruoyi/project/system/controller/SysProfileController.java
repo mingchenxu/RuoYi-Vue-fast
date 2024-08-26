@@ -1,5 +1,6 @@
 package com.ruoyi.project.system.controller;
 
+import com.ruoyi.project.system.service.ISysConfigService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -40,6 +41,9 @@ public class SysProfileController extends BaseController
 
     @Autowired
     private TokenService tokenService;
+
+    @Autowired
+    private ISysConfigService configService;
 
     /**
      * 个人信息
@@ -99,6 +103,10 @@ public class SysProfileController extends BaseController
         Matcher matcher = pattern.matcher(newPassword);
         if(!matcher.matches()){
             return AjaxResult.error("密码必须包含字母、数字、特殊字符，最少8位字符");
+        }
+        String limitPassword = configService.selectConfigByKey("sys.password.blackList");
+        if(StringUtils.isNotEmpty(limitPassword) && limitPassword.contains(newPassword)){
+            return error("此密码在黑名单中，请重新设置密码");
         }
         LoginUser loginUser = getLoginUser();
         String userName = loginUser.getUsername();
