@@ -104,7 +104,7 @@ public class CheckPassword {
         } else if (!"ok".equals(checkPhone)) {
             return checkPhone;
         } */else {
-            return "true";
+            return "ok";
         }
 
     }

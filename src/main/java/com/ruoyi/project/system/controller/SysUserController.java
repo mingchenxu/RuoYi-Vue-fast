@@ -8,7 +8,6 @@ import javax.servlet.http.HttpServletResponse;
 
 import com.ruoyi.common.utils.CheckPassword;
 import com.ruoyi.project.system.service.*;
-import com.sun.tools.javac.comp.Check;
 import org.apache.commons.lang3.ArrayUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
