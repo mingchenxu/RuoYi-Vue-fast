@@ -6,7 +6,9 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletResponse;
 
+import com.ruoyi.common.utils.CheckPassword;
 import com.ruoyi.project.system.service.*;
+import com.sun.tools.javac.comp.Check;
 import org.apache.commons.lang3.ArrayUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -127,13 +129,9 @@ public class SysUserController extends BaseController
     @PostMapping
     public AjaxResult add(@Validated @RequestBody SysUser user)
     {
-        // 至少包含字母、数字、特殊字符，6-12位
-        String regex = "^(?=.*\\d)(?=.*[a-zA-Z])(?=.*[^\\da-zA-Z\\s]).{8,32}$";
-        Pattern pattern = Pattern.compile(regex);
-        // 将字符串与正则表达式匹配
-        Matcher matcher = pattern.matcher(user.getPassword());
-        if(!matcher.matches()){
-            return error("密码必须包含字母、数字、特殊字符，最少8位字符");
+        String checkMsg = CheckPassword.checkPwd(user.getPassword());
+        if(!"ok".equals(checkMsg)){
+            return error(checkMsg);
         }
         String limitPassword = configService.selectConfigByKey("sys.password.blackList");
         if(StringUtils.isNotEmpty(limitPassword) && limitPassword.contains(user.getPassword())){
@@ -209,13 +207,9 @@ public class SysUserController extends BaseController
     @PutMapping("/resetPwd")
     public AjaxResult resetPwd(@RequestBody SysUser user)
     {
-        // 至少包含字母、数字、特殊字符，6-12位
-        String regex = "^(?=.*\\d)(?=.*[a-zA-Z])(?=.*[^\\da-zA-Z\\s]).{8,32}$";
-        Pattern pattern = Pattern.compile(regex);
-        // 将字符串与正则表达式匹配
-        Matcher matcher = pattern.matcher(user.getPassword());
-        if(!matcher.matches()){
-            return AjaxResult.error("密码必须包含字母、数字、特殊字符，最少8位字符");
+        String checkMsg = CheckPassword.checkPwd(user.getPassword());
+        if(!"ok".equals(checkMsg)){
+            return error(checkMsg);
         }
         String limitPassword = configService.selectConfigByKey("sys.password.blackList");
         if(StringUtils.isNotEmpty(limitPassword) && limitPassword.contains(user.getPassword())){

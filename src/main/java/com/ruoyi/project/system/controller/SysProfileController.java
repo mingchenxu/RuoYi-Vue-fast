@@ -1,5 +1,6 @@
 package com.ruoyi.project.system.controller;
 
+import com.ruoyi.common.utils.CheckPassword;
 import com.ruoyi.project.system.service.ISysConfigService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -96,13 +97,9 @@ public class SysProfileController extends BaseController
     @PutMapping("/updatePwd")
     public AjaxResult updatePwd(String oldPassword, String newPassword)
     {
-        // 至少包含字母、数字、特殊字符，6-12位
-        String regex = "^(?=.*\\d)(?=.*[a-zA-Z])(?=.*[^\\da-zA-Z\\s]).{8,32}$";
-        Pattern pattern = Pattern.compile(regex);
-        // 将字符串与正则表达式匹配
-        Matcher matcher = pattern.matcher(newPassword);
-        if(!matcher.matches()){
-            return AjaxResult.error("密码必须包含字母、数字、特殊字符，最少8位字符");
+        String checkMsg = CheckPassword.checkPwd(newPassword);
+        if(!"ok".equals(checkMsg)){
+            return error(checkMsg);
         }
         String limitPassword = configService.selectConfigByKey("sys.password.blackList");
         if(StringUtils.isNotEmpty(limitPassword) && limitPassword.contains(newPassword)){
