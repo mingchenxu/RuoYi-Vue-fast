@@ -59,7 +59,7 @@ public class CheckPassword {
     public static String checkp(String pwd) {
         String str = "^(?![a-zA-Z]+$)(?![A-Z0-9]+$)(?![A-Z\\W_!@#$%^&*`~()-+=]+$)(?![a-z0-9]+$)(?![a-z\\W_!@#$%^&*`~()-+=]+$)(?![0-9\\W_!@#$%^&*`~()-+=]+$)[a-zA-Z0-9\\W_!@#$%^&*`~()-+=]{8,30}$";
         if (!pwd.matches(str)) {
-            return "口令至少由8位及以上大小写字母、数字及特殊字符等混合、随机组成(至少包括数字、小写字母、大写字母和特殊符号中的三种)";
+            return "密码至少由8位及以上大小写字母、数字及特殊字符等混合、随机组成(至少包括数字、小写字母、大写字母和特殊符号中的三种)";
         } else {
             return "ok";
         }
@@ -130,7 +130,7 @@ public class CheckPassword {
             bf.deleteCharAt(len - 1);
         }
         if (StringUtils.isNotBlank(bf.toString())) {
-            return "包含手机号";
+            return "密码包含手机号";
         } else {
             return "ok";
         }
@@ -151,7 +151,7 @@ public class CheckPassword {
             list.add(n);
         }
         if (!list.isEmpty()) {
-            return "包含固定电话";
+            return "密码包含固定电话";
         } else {
             return "ok";
         }
@@ -219,7 +219,7 @@ public class CheckPassword {
 
         }
         if (flag) {
-            return "不能连续三个或者三个以上字符";
+            return "不得包含键盘上任意连续的三个字符或shift转换字符";
 
         } else {
             return "ok";
@@ -256,7 +256,7 @@ public class CheckPassword {
             }
         }
         if (flag) {
-            return "不能连续3字母";
+            return "密码不能连续3位或3位以上";
 
         } else {
             return "ok";
