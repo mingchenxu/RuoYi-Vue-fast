@@ -97,7 +97,11 @@ public class SysProfileController extends BaseController
     @PutMapping("/updatePwd")
     public AjaxResult updatePwd(String oldPassword, String newPassword)
     {
-        String checkMsg = CheckPassword.checkPwd(newPassword);
+        LoginUser loginUser = getLoginUser();
+        String userName = loginUser.getUsername();
+        String password = loginUser.getPassword();
+        //验证密码强度
+        String checkMsg = CheckPassword.checkPwd(newPassword, userName);
         if(!"ok".equals(checkMsg)){
             return error(checkMsg);
         }
@@ -105,9 +109,6 @@ public class SysProfileController extends BaseController
         if(StringUtils.isNotEmpty(limitPassword) && limitPassword.contains(newPassword)){
             return error("此密码在黑名单中，请重新设置密码");
         }
-        LoginUser loginUser = getLoginUser();
-        String userName = loginUser.getUsername();
-        String password = loginUser.getPassword();
         if (!SecurityUtils.matchesPassword(oldPassword, password))
         {
             return error("修改密码失败，旧密码错误");

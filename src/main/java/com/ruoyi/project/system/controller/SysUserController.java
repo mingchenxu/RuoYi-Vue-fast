@@ -128,7 +128,7 @@ public class SysUserController extends BaseController
     @PostMapping
     public AjaxResult add(@Validated @RequestBody SysUser user)
     {
-        String checkMsg = CheckPassword.checkPwd(user.getPassword());
+        String checkMsg = CheckPassword.checkPwd(user.getPassword(),user.getUserName());
         if(!"ok".equals(checkMsg)){
             return error(checkMsg);
         }
@@ -206,7 +206,8 @@ public class SysUserController extends BaseController
     @PutMapping("/resetPwd")
     public AjaxResult resetPwd(@RequestBody SysUser user)
     {
-        String checkMsg = CheckPassword.checkPwd(user.getPassword());
+        user = userService.selectUserById(user.getUserId());
+        String checkMsg = CheckPassword.checkPwd(user.getPassword(),user.getUserName());
         if(!"ok".equals(checkMsg)){
             return error(checkMsg);
         }

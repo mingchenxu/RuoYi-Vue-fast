@@ -1,6 +1,7 @@
 package com.ruoyi.common.utils;
 
 import org.apache.commons.lang3.StringUtils;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -22,7 +23,7 @@ public class CheckPassword {
         p = Pattern.compile(regx);
         m = p.matcher(pwd);
         if (m.matches()) {
-            return "包含三个或者三个以上相同";
+            return "密码包含三个或者三个以上相同字符";
         } else {
             return "ok";
 
@@ -43,7 +44,7 @@ public class CheckPassword {
         Matcher matcher = pattern.matcher(pwd);
 
         if (matcher.find()) {
-            return "包含生日或者身份证";
+            return "密码包含生日或者身份证";
         } else {
             return "ok";
         }
@@ -72,7 +73,7 @@ public class CheckPassword {
      * @param pwd 密码
      * @return String
      */
-    public static String checkPwd(String pwd) {
+    public static String checkPwd(String pwd,String userName) {
         //密码规则
         String check = checkp(pwd);
         //键盘上连续3位或者以上
@@ -87,6 +88,7 @@ public class CheckPassword {
         //String checkMobile = checkMobile(pwd);
         //包含固定电话
         //String checkPhone = checkPhone(pwd);
+        String checkUserName = checkUserName(pwd, userName);
 
 
         if (!"ok".equals(check)) {
@@ -103,7 +105,9 @@ public class CheckPassword {
             return checkMobile;
         } else if (!"ok".equals(checkPhone)) {
             return checkPhone;
-        } */else {
+        } */else if (!"ok".equals(checkUserName)) {
+            return checkUserName;
+        }else {
             return "ok";
         }
 
@@ -219,7 +223,7 @@ public class CheckPassword {
 
         }
         if (flag) {
-            return "不得包含键盘上任意连续的三个字符或shift转换字符";
+            return "密码不得包含键盘上任意连续的三个字符或shift转换字符";
 
         } else {
             return "ok";
@@ -256,7 +260,22 @@ public class CheckPassword {
             }
         }
         if (flag) {
-            return "密码不能连续3位或3位以上";
+            return "密码不能连续3位或3位以上字符";
+
+        } else {
+            return "ok";
+        }
+    }
+
+    /**
+     * 不能包含用户名
+     * @param str
+     * @param userName
+     * @return
+     */
+    public static String checkUserName(String str,String userName) {
+        if (str.contains(userName)) {
+            return "密码不能包含用户名";
 
         } else {
             return "ok";

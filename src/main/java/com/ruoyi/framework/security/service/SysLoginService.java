@@ -238,9 +238,6 @@ public class SysLoginService
             AsyncManager.me().execute(AsyncFactory.recordLogininfor(mobile, Constants.LOGIN_FAIL, MessageUtils.message("user.jcaptcha.error")));
             throw new CaptchaException();
         }
-        //验证通过再删除
-        redisCache.deleteObject(mobile);
-        redisCache.deleteObject(captchaErrorKey);
         // 用户验证
         Authentication authentication = null;
         try {
@@ -256,6 +253,9 @@ public class SysLoginService
                 throw new ServiceException(e.getMessage());
             }
         }
+        //验证通过再删除
+        redisCache.deleteObject(mobile);
+        redisCache.deleteObject(captchaErrorKey);
         AsyncManager.me().execute(AsyncFactory.recordLogininfor(mobile, Constants.LOGIN_SUCCESS, MessageUtils.message("user.login.success")));
         LoginUser loginUser = (LoginUser) authentication.getPrincipal();
         // 生成token
