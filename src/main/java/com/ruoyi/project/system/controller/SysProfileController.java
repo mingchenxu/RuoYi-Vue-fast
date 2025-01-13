@@ -2,6 +2,7 @@ package com.ruoyi.project.system.controller;
 
 import com.ruoyi.common.utils.CheckPassword;
 import com.ruoyi.project.system.service.ISysConfigService;
+import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -30,7 +31,7 @@ import java.util.regex.Pattern;
 
 /**
  * 个人信息 业务处理
- * 
+ *
  * @author ruoyi
  */
 @RestController
@@ -95,8 +96,10 @@ public class SysProfileController extends BaseController
      */
     @Log(title = "个人信息", businessType = BusinessType.UPDATE)
     @PutMapping("/updatePwd")
-    public AjaxResult updatePwd(String oldPassword, String newPassword)
+    public AjaxResult updatePwd(@RequestBody Map<String, String> params)
     {
+        String oldPassword = params.get("oldPassword");
+        String newPassword = params.get("newPassword");
         LoginUser loginUser = getLoginUser();
         String userName = loginUser.getUsername();
         String password = loginUser.getPassword();
