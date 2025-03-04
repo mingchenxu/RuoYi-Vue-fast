@@ -3,10 +3,12 @@ package com.ruoyi.framework.config;
 import com.ruoyi.framework.security.sms.SmsCodeAuthenticationProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
@@ -25,6 +27,9 @@ import com.ruoyi.framework.config.properties.PermitAllUrlProperties;
 import com.ruoyi.framework.security.filter.JwtAuthenticationTokenFilter;
 import com.ruoyi.framework.security.handle.AuthenticationEntryPointImpl;
 import com.ruoyi.framework.security.handle.LogoutSuccessHandlerImpl;
+
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * spring security配置
@@ -80,15 +85,52 @@ public class SecurityConfig
     private PermitAllUrlProperties permitAllUrl;
 
     /**
-     * 身份验证实现
+     * @Description: 账号密码登录
+     * @author chenlin
+     * @date 2025/3/4 13:53
+     * @param
+     * @return org.springframework.security.authentication.dao.DaoAuthenticationProvider
      */
     @Bean
-    public AuthenticationManager authenticationManager()
-    {
+    @ConditionalOnMissingBean
+    public DaoAuthenticationProvider daoAuthenticationProvider() {
         DaoAuthenticationProvider daoAuthenticationProvider = new DaoAuthenticationProvider();
         daoAuthenticationProvider.setUserDetailsService(userDetailsService);
         daoAuthenticationProvider.setPasswordEncoder(bCryptPasswordEncoder());
-        return new ProviderManager(daoAuthenticationProvider);
+        return daoAuthenticationProvider;
+    }
+
+    /***
+     *
+     * description: 收集短信登录的Provider
+     * @author mingchenxu
+     * @date 2023/6/28 14:31
+     * @return org.springframework.security.authentication.dao.DaoAuthenticationProvider
+     */
+    @Bean
+    @ConditionalOnMissingBean
+    public SmsCodeAuthenticationProvider smsAuthenticationProvider() {
+        SmsCodeAuthenticationProvider smsCodeAuthenticationProvider = new SmsCodeAuthenticationProvider();
+        smsCodeAuthenticationProvider.setUserDetailsService(userDetailsBySmsCodeServiceImpl);
+        return smsCodeAuthenticationProvider;
+    }
+
+
+    /**
+     * @Description: 账号密码登录+短信登录
+     * @author chenlin
+     * @date 2025/3/4 13:54
+     * @param daoAuthenticationProvider
+     * @param smsCodeAuthenticationProvider
+     * @return org.springframework.security.authentication.AuthenticationManager
+     */
+    @Bean
+    @ConditionalOnMissingBean
+    public AuthenticationManager authenticationManager(DaoAuthenticationProvider daoAuthenticationProvider,
+                                                       SmsCodeAuthenticationProvider smsCodeAuthenticationProvider) {
+        List<AuthenticationProvider> providers = Arrays
+                .asList(daoAuthenticationProvider, smsCodeAuthenticationProvider);
+        return new ProviderManager(providers);
     }
 
     /**
@@ -109,9 +151,6 @@ public class SecurityConfig
     @Bean
     protected SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception
     {
-        SmsCodeAuthenticationProvider smsCodeAuthenticationProvider = new SmsCodeAuthenticationProvider();
-        smsCodeAuthenticationProvider.setUserDetailsService(userDetailsBySmsCodeServiceImpl);
-
         return httpSecurity
             // CSRF禁用，因为不使用session
             .csrf(csrf -> csrf.disable())
@@ -143,8 +182,6 @@ public class SecurityConfig
             // 添加CORS filter
             .addFilterBefore(corsFilter, JwtAuthenticationTokenFilter.class)
             .addFilterBefore(corsFilter, LogoutFilter.class)
-            //增加短信登录
-            .authenticationProvider(smsCodeAuthenticationProvider)
             .build();
     }
 
