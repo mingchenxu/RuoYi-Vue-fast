@@ -172,6 +172,8 @@ public class SecurityConfig
                     .antMatchers("/swagger-ui.html", "/swagger-resources/**", "/webjars/**", "/*/api-docs", "/druid/**").permitAll()
                     // 滑动验证码图片
                     .antMatchers("/captcha/**").permitAll()
+                    //系统信息配置
+                    .antMatchers("/system/info/getInfo/**").permitAll()
                     // 除上面外的所有请求全部需要鉴权认证
                     .anyRequest().authenticated();
             })
