@@ -56,8 +56,6 @@ public class TokenService
 
     private static final Long MILLIS_MINUTE_TWENTY = 20 * 60 * 1000L;
 
-    private static final Long MILLIS_DAY = 144 * MILLIS_MINUTE_TEN;
-
     @Autowired
     private RedisCache redisCache;
 

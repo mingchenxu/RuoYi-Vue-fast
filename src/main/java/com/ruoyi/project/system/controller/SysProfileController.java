@@ -104,6 +104,7 @@ public class SysProfileController extends BaseController
         String newPassword = params.get("newPassword");
         LoginUser loginUser = getLoginUser();
         Long userId = loginUser.getUserId();
+        String userName = loginUser.getUsername();
         String password = loginUser.getPassword();
         //验证密码强度
         String checkMsg = CheckPassword.checkPwd(newPassword, userName);
