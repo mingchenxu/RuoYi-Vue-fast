@@ -54,7 +54,7 @@ public class TokenService
 
     protected static final long MILLIS_MINUTE = 60 * MILLIS_SECOND;
 
-    private static final Long MILLIS_MINUTE_TEN = 20 * 60 * 1000L;
+    private static final Long MILLIS_MINUTE_TWENTY = 20 * 60 * 1000L;
 
     private static final Long MILLIS_DAY = 144 * MILLIS_MINUTE_TEN;
 
@@ -143,6 +143,7 @@ public class TokenService
 
         Map<String, Object> claims = new HashMap<>();
         claims.put(Constants.LOGIN_USER_KEY, token);
+        claims.put(Constants.JWT_USERNAME, loginUser.getUsername());
         return createToken(claims);
     }
 
@@ -150,11 +151,18 @@ public class TokenService
      * 验证令牌有效期，相差不足20分钟，自动刷新缓存
      *
      * @param loginUser 登录用户
+     *
+     * @param loginUser 登录信息
+     * @return 令牌
      */
     public void verifyToken(LoginUser loginUser)
     {
         long expireTime = loginUser.getExpireTime();
         long currentTime = System.currentTimeMillis();
+//        if (expireTime - currentTime <= MILLIS_MINUTE_TWENTY)
+//        {
+//            refreshToken(loginUser);
+//        }
         // 过期时间小于一天，刷新refresh_token有效期
 //        if (expireTime - currentTime <= MILLIS_DAY)
 //        {
